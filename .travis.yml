@@ -1,6 +1,8 @@
 language: node_js
 node_js:
-  - "0.12"
-  - "iojs"
+  - "5.4"
+  - "4.2"
 sudo: false
-before_install: pip install --user git+https://github.com/jupyter/jupyter_core.git#egg=jupyter_core
+before_install:
+  - pip install --user jupyter_core
+
