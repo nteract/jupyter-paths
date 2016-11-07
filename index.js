@@ -1,13 +1,13 @@
 /**
  * @module jupyter-paths
  *
- * @description Module `jupyter-paths` provides path helpers for IPython 4.x
+ * @description Module `jupyter-paths` provides path helpers for Jupyter 4.x
  */
 
+const exec = require('child_process').exec;
 const fs = require('fs');
 const path = require('path');
 const home = require('home-dir');
-const sysPrefixPromise = require('sys-prefix-promise');
 
 var sysPrefixGuess = undefined;
 
@@ -68,6 +68,27 @@ function guessSysPrefix() {
   return sysPrefixGuess;
 }
 
+var askJupyterPromise = null;
+
+function askJupyter() {
+  // ask Jupyter where the paths are
+  if (!askJupyterPromise) {
+    askJupyterPromise = new Promise((resolve, reject) => {
+      exec('jupyter --paths --json',
+        (err, stdout) => {
+          if (err) {
+            console.warn("Failed to ask Jupyter about its paths: " + err);
+            reject(err);
+          } else {
+            resolve(JSON.parse(stdout.toString().trim()));
+          }
+        });
+    });
+  }
+  return askJupyterPromise;
+}
+
+
 function systemConfigDirs() {
   var paths = [];
   // System wide for Windows and Unix
@@ -82,6 +103,12 @@ function systemConfigDirs() {
 }
 
 function configDirs(opts) {
+  if (opts && opts.askJupyter) {
+    return askJupyter()
+      .then(paths => paths.config)
+      .catch(err => configDirs())
+  }
+
   var paths = [];
   if (process.env.JUPYTER_CONFIG_DIR) {
     paths.push(process.env.JUPYTER_CONFIG_DIR);
@@ -91,18 +118,11 @@ function configDirs(opts) {
   const systemDirs = systemConfigDirs();
 
   if (opts && opts.withSysPrefix) {
-    return sysPrefixPromise()
-            .then(sysPrefix => path.join(sysPrefix, 'etc', 'jupyter'))
-            .catch(err => {
-              // catch failure to get sys.prefix
-              console.warn("withSysPrefix requested, but failed with " + err)
-            })
-            .then(sysPathed => {
-              if (sysPathed && systemDirs.indexOf(sysPathed) === -1) {
-                paths.push(sysPathed);
-              }
-              return paths.concat(systemDirs);
-            });
+    return new Promise((resolve, reject) => {
+      // deprecated: withSysPrefix expects a Promise
+      // but no change in content
+      resolve(configDirs());
+    });
   }
   // inexpensive guess, based on location of `python` executable
   var sysPrefix = guessSysPrefix();
@@ -153,6 +173,13 @@ function userDataDir() {
  * @return {Array} All the Jupyter Data Dirs
  */
 function dataDirs(opts) {
+  if (opts && opts.askJupyter) {
+    return askJupyter()
+      .then(paths => paths.data)
+      // fallback on default
+      .catch(err => dataDirs())
+  }
+
   var paths = [];
   if (process.env.JUPYTER_PATH) {
     paths.push(process.env.JUPYTER_PATH);
@@ -163,18 +190,11 @@ function dataDirs(opts) {
   const systemDirs = systemDataDirs();
 
   if (opts && opts.withSysPrefix) {
-    return sysPrefixPromise()
-            .then(sysPrefix => path.join(sysPrefix, 'share', 'jupyter'))
-            .catch(err => {
-              // catch failure to get sys.prefix
-              console.warn("withSysPrefix requested, but failed with " + err)
-            })
-            .then(sysPathed => {
-              if (sysPathed && systemDirs.indexOf(sysPathed) === -1) {
-                paths.push(sysPathed);
-              }
-              return paths.concat(systemDataDirs());
-            });
+    return new Promise((resolve, reject) => {
+      // deprecated: withSysPrefix expects a Promise
+      // but no change in content
+      resolve(dataDirs());
+    });
   }
   // inexpensive guess, based on location of `python` executable
   var sysPrefix = guessSysPrefix();
@@ -185,7 +205,14 @@ function dataDirs(opts) {
   return paths.concat(systemDirs);
 }
 
-function runtimeDir() {
+function runtimeDir(opts) {
+  if (opts && opts.askJupyter) {
+    return askJupyter()
+      .then(paths => paths.runtime)
+      // fallback on default
+      .catch(err => runtimeDir())
+  }
+
   if (process.env.JUPYTER_RUNTIME_DIR) {
     return process.env.JUPYTER_RUNTIME_DIR;
   }
