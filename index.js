@@ -200,7 +200,9 @@ function dataDirs(opts) {
       paths.push(sysPathed);
     }
   }
-  return paths.concat(systemDirs);
+  paths = paths.concat(systemDirs);
+  paths.push(home(".ipython"));
+  return paths;
 }
 
 function runtimeDir(opts) {
