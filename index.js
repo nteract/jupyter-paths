@@ -163,17 +163,22 @@ function userDataDir() {
  * The user of this function should make sure to make sure the directories
  * exist.
  *
- * When withSysPrefix is set, this returns a promise of directories
+ * When askJupyter is set, this returns a promise of directories
  *
- * @param  {bool} withSysPrefix include the sys.prefix paths
+ * @param  {bool} askJupyter let Jupyter do the lookup
  * @return {Array} All the Jupyter Data Dirs
  */
 function dataDirs(opts) {
-  if (opts && opts.askJupyter) {
+  if (
+    opts &&
+    (opts.askJupyter ||
+      // withSysPrefix is deprecated in favor of asking jupyter
+      opts.withSysPrefix)
+  ) {
     return (
       askJupyter()
         .then(paths => paths.data)
-        // fallback on default
+        // fallback on default of looking up data directories
         .catch(err => dataDirs())
     );
   }
@@ -187,13 +192,6 @@ function dataDirs(opts) {
 
   const systemDirs = systemDataDirs();
 
-  if (opts && opts.withSysPrefix) {
-    return new Promise((resolve, reject) => {
-      // deprecated: withSysPrefix expects a Promise
-      // but no change in content
-      resolve(dataDirs());
-    });
-  }
   // inexpensive guess, based on location of `python` executable
   var sysPrefix = guessSysPrefix();
   if (sysPrefix) {
