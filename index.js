@@ -4,10 +4,10 @@
  * @description Module `jupyter-paths` provides path helpers for Jupyter 4.x
  */
 
-const exec = require('child_process').exec;
-const fs = require('fs');
-const path = require('path');
-const home = require('home-dir');
+const exec = require("child_process").exec;
+const fs = require("fs");
+const path = require("path");
+const home = require("home-dir");
 
 var sysPrefixGuess = undefined;
 
@@ -30,27 +30,27 @@ function guessSysPrefix() {
   // only run once:
   if (sysPrefixGuess !== undefined) return sysPrefixGuess;
 
-  var PATH = (process.env.PATH || '').split(path.delimiter);
+  var PATH = (process.env.PATH || "").split(path.delimiter);
   if (PATH.length === 0) {
     sysPrefixGuess = null;
     return;
   }
 
-  var pathext = [''];
-  if (process.platform === 'win32') {
-    pathext = (process.env.PATHEXT || '').split(path.delimiter);
+  var pathext = [""];
+  if (process.platform === "win32") {
+    pathext = (process.env.PATHEXT || "").split(path.delimiter);
   }
 
   PATH.some(bin => {
     bin = path.resolve(bin);
-    var python = path.join(bin, 'python');
+    var python = path.join(bin, "python");
 
     return pathext.some(ext => {
       var exe = python + ext;
       if (accessCheck(exe)) {
         // PREFIX/bin/python exists, return PREFIX
         // following symlinks
-        if (process.platform === 'win32') {
+        if (process.platform === "win32") {
           // Windows: Prefix\Python.exe
           sysPrefixGuess = path.dirname(fs.realpathSync(exe));
         } else {
@@ -59,8 +59,8 @@ function guessSysPrefix() {
         }
         return true;
       }
-    })
-  })
+    });
+  });
   if (sysPrefixGuess === undefined) {
     // store null as nothing found, but don't run again
     sysPrefixGuess = null;
@@ -74,30 +74,27 @@ function askJupyter() {
   // ask Jupyter where the paths are
   if (!askJupyterPromise) {
     askJupyterPromise = new Promise((resolve, reject) => {
-      exec('jupyter --paths --json',
-        (err, stdout) => {
-          if (err) {
-            console.warn("Failed to ask Jupyter about its paths: " + err);
-            reject(err);
-          } else {
-            resolve(JSON.parse(stdout.toString().trim()));
-          }
-        });
+      exec("jupyter --paths --json", (err, stdout) => {
+        if (err) {
+          console.warn("Failed to ask Jupyter about its paths: " + err);
+          reject(err);
+        } else {
+          resolve(JSON.parse(stdout.toString().trim()));
+        }
+      });
     });
   }
   return askJupyterPromise;
 }
 
-
 function systemConfigDirs() {
   var paths = [];
   // System wide for Windows and Unix
-  if (process.platform === 'win32') {
-    paths.push(path.resolve(
-      path.join(process.env.PROGRAMDATA, 'jupyter')));
+  if (process.platform === "win32") {
+    paths.push(path.resolve(path.join(process.env.PROGRAMDATA, "jupyter")));
   } else {
-    paths.push('/usr/local/etc/jupyter');
-    paths.push('/etc/jupyter');
+    paths.push("/usr/local/etc/jupyter");
+    paths.push("/etc/jupyter");
   }
   return paths;
 }
@@ -106,7 +103,7 @@ function configDirs(opts) {
   if (opts && opts.askJupyter) {
     return askJupyter()
       .then(paths => paths.config)
-      .catch(err => configDirs())
+      .catch(err => configDirs());
   }
 
   var paths = [];
@@ -114,7 +111,7 @@ function configDirs(opts) {
     paths.push(process.env.JUPYTER_CONFIG_DIR);
   }
 
-  paths.push(home('.jupyter'));
+  paths.push(home(".jupyter"));
   const systemDirs = systemConfigDirs();
 
   if (opts && opts.withSysPrefix) {
@@ -126,7 +123,7 @@ function configDirs(opts) {
   }
   // inexpensive guess, based on location of `python` executable
   var sysPrefix = guessSysPrefix();
-  var sysPathed = path.join(sysPrefix, 'etc', 'jupyter');
+  var sysPathed = path.join(sysPrefix, "etc", "jupyter");
   if (systemDirs.indexOf(sysPathed) === -1) {
     paths.push(sysPathed);
   }
@@ -136,12 +133,11 @@ function configDirs(opts) {
 function systemDataDirs() {
   var paths = [];
   // System wide for Windows and Unix
-  if (process.platform === 'win32') {
-    paths.push(path.resolve(
-      path.join(process.env.PROGRAMDATA, 'jupyter')));
+  if (process.platform === "win32") {
+    paths.push(path.resolve(path.join(process.env.PROGRAMDATA, "jupyter")));
   } else {
-    paths.push('/usr/local/share/jupyter');
-    paths.push('/usr/share/jupyter');
+    paths.push("/usr/local/share/jupyter");
+    paths.push("/usr/share/jupyter");
   }
   return paths;
 }
@@ -153,13 +149,13 @@ function systemDataDirs() {
  */
 function userDataDir() {
   // Userland specific
-  if (process.platform === 'darwin') {
-    return home('Library/Jupyter');
-  } else if (process.platform === 'win32') {
-    return path.resolve(path.join(process.env.APPDATA, 'jupyter'));
+  if (process.platform === "darwin") {
+    return home("Library/Jupyter");
+  } else if (process.platform === "win32") {
+    return path.resolve(path.join(process.env.APPDATA, "jupyter"));
   }
   // TODO: respect XDG_DATA_HOME
-  return home('.local/share/jupyter');
+  return home(".local/share/jupyter");
 }
 
 /**
@@ -174,10 +170,12 @@ function userDataDir() {
  */
 function dataDirs(opts) {
   if (opts && opts.askJupyter) {
-    return askJupyter()
-      .then(paths => paths.data)
-      // fallback on default
-      .catch(err => dataDirs())
+    return (
+      askJupyter()
+        .then(paths => paths.data)
+        // fallback on default
+        .catch(err => dataDirs())
+    );
   }
 
   var paths = [];
@@ -198,8 +196,8 @@ function dataDirs(opts) {
   }
   // inexpensive guess, based on location of `python` executable
   var sysPrefix = guessSysPrefix();
-  if(sysPrefix) {
-    var sysPathed = path.join(sysPrefix, 'share', 'jupyter');
+  if (sysPrefix) {
+    var sysPathed = path.join(sysPrefix, "share", "jupyter");
     if (systemDirs.indexOf(sysPathed) === -1) {
       paths.push(sysPathed);
     }
@@ -209,10 +207,12 @@ function dataDirs(opts) {
 
 function runtimeDir(opts) {
   if (opts && opts.askJupyter) {
-    return askJupyter()
-      .then(paths => paths.runtime)
-      // fallback on default
-      .catch(err => runtimeDir())
+    return (
+      askJupyter()
+        .then(paths => paths.runtime)
+        // fallback on default
+        .catch(err => runtimeDir())
+    );
   }
 
   if (process.env.JUPYTER_RUNTIME_DIR) {
@@ -220,13 +220,13 @@ function runtimeDir(opts) {
   }
 
   if (process.env.XDG_RUNTIME_DIR) {
-    return path.join(process.env.XDG_RUNTIME_DIR, 'jupyter');
+    return path.join(process.env.XDG_RUNTIME_DIR, "jupyter");
   }
-  return path.join(userDataDir(), 'runtime');
+  return path.join(userDataDir(), "runtime");
 }
 
 module.exports = {
   dataDirs,
   runtimeDir,
-  configDirs,
+  configDirs
 };
