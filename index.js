@@ -53,13 +53,13 @@ function guessSysPrefix() {
         if (process.platform === "win32") {
           // Windows: Prefix\Python.exe
           try {
-            sysPrefixGuess = path.dirname(fs.realpathSync(exe));
+            sysPrefixGuess = path.dirname(path.resolve(exe));
           } catch {
             sysPrefixGuess = null;
           }
         } else {
           // Everywhere else: prefix/bin/python
-          sysPrefixGuess = path.dirname(path.dirname(fs.realpathSync(exe)));
+          sysPrefixGuess = path.dirname(path.dirname(path.resolve(exe)));
         }
         return true;
       }
