@@ -3,6 +3,7 @@
   "version": "2.0.3",
   "description": "Node wrapping of jupyter/jupyter_core to resolve paths across Jupyter installations.",
   "main": "index.js",
+  "types": "./index.d.ts",
   "scripts": {
     "test": "mocha",
     "test:watch": "npm run test -- --watch"
