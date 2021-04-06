@@ -9,7 +9,7 @@ export interface JupyterPaths {
 }
 
 /** Ask Jupyter where the paths are */
-declare function askJupyter(): Promise<JupyterPaths>
+export declare function askJupyter(): Promise<JupyterPaths>
 
 interface Options {
   /** Ask Jupyter where the paths are */

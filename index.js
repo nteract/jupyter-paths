@@ -236,4 +236,5 @@ module.exports = {
   dataDirs,
   runtimeDir,
   configDirs,
+  askJupyter
 };
