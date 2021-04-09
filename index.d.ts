@@ -1,14 +1,15 @@
+/** The data returned by `jupyter --paths --json` */
 export interface JupyterPaths {
   /** Paths: all the Jupyter Data Dirs */
-  data: string[]
+  data: Array<string>
 
   /** RuntimeDir */
-  runtime: string
+  runtime: Array<string>
 
-  config: string
+  config: Array<string>
 }
 
-/** Ask Jupyter where the paths are */
+/** Ask Jupyter where the paths are using `jupyter --paths --json` */
 export declare function askJupyter(): Promise<JupyterPaths>
 
 interface Options {
