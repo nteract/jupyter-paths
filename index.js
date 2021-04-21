@@ -9,7 +9,7 @@ const fs = require("fs");
 const path = require("path");
 const home = require("home-dir");
 
-var sysPrefixGuess = undefined;
+let sysPrefixGuess = undefined;
 
 function accessCheck(d) {
   // check if a directory exists and is listable (X_OK)
@@ -30,23 +30,23 @@ function guessSysPrefix() {
   // only run once:
   if (sysPrefixGuess !== undefined) return sysPrefixGuess;
 
-  var PATH = (process.env.PATH || "").split(path.delimiter);
+  const PATH = (process.env.PATH || "").split(path.delimiter);
   if (PATH.length === 0) {
     sysPrefixGuess = null;
     return;
   }
 
-  var pathext = [""];
+  let pathext = [""];
   if (process.platform === "win32") {
     pathext = (process.env.PATHEXT || "").split(path.delimiter);
   }
 
   PATH.some((bin) => {
     bin = path.resolve(bin);
-    var python = path.join(bin, "python");
+    const python = path.join(bin, "python");
 
     return pathext.some((ext) => {
-      var exe = python + ext;
+      const exe = python + ext;
       if (accessCheck(exe)) {
         // PREFIX/bin/python exists, return PREFIX
         // following symlinks
@@ -72,7 +72,7 @@ function guessSysPrefix() {
   return sysPrefixGuess;
 }
 
-var askJupyterPromise = null;
+let askJupyterPromise = null;
 
 function askJupyter() {
   // ask Jupyter where the paths are
@@ -92,7 +92,7 @@ function askJupyter() {
 }
 
 function systemConfigDirs() {
-  var paths = [];
+  const paths = [];
   // System wide for Windows and Unix
   if (process.platform === "win32") {
     paths.push(path.resolve(path.join(process.env.PROGRAMDATA, "jupyter")));
@@ -110,7 +110,7 @@ function configDirs(opts) {
       .catch((err) => configDirs());
   }
 
-  var paths = [];
+  const paths = [];
   if (process.env.JUPYTER_CONFIG_DIR) {
     paths.push(process.env.JUPYTER_CONFIG_DIR);
   }
@@ -126,8 +126,8 @@ function configDirs(opts) {
     });
   }
   // inexpensive guess, based on location of `python` executable
-  var sysPrefix = guessSysPrefix();
-  var sysPathed = path.join(sysPrefix, "etc", "jupyter");
+  const sysPrefix = guessSysPrefix();
+  const sysPathed = path.join(sysPrefix, "etc", "jupyter");
   if (systemDirs.indexOf(sysPathed) === -1) {
     paths.push(sysPathed);
   }
@@ -135,7 +135,7 @@ function configDirs(opts) {
 }
 
 function systemDataDirs() {
-  var paths = [];
+  const paths = [];
   // System wide for Windows and Unix
   if (process.platform === "win32") {
     paths.push(path.resolve(path.join(process.env.PROGRAMDATA, "jupyter")));
@@ -182,7 +182,7 @@ function dataDirs(opts) {
     );
   }
 
-  var paths = [];
+  const paths = [];
   if (process.env.JUPYTER_PATH) {
     paths.push(process.env.JUPYTER_PATH);
   }
@@ -200,9 +200,9 @@ function dataDirs(opts) {
   }
   // inexpensive guess, based on location of `python` executable
   try {
-    var sysPrefix = guessSysPrefix();
+    const sysPrefix = guessSysPrefix();
     if (sysPrefix) {
-      var sysPathed = path.join(sysPrefix, "share", "jupyter");
+      const sysPathed = path.join(sysPrefix, "share", "jupyter");
       if (systemDirs.indexOf(sysPathed) === -1) {
         paths.push(sysPathed);
       }
@@ -236,4 +236,5 @@ module.exports = {
   dataDirs,
   runtimeDir,
   configDirs,
+  askJupyter
 };
