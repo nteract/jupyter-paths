@@ -1,6 +1,6 @@
 {
   "name": "jupyter-paths",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Node wrapping of jupyter/jupyter_core to resolve paths across Jupyter installations.",
   "main": "index.js",
   "types": "./index.d.ts",
@@ -48,7 +48,9 @@
       [
         "@semantic-release/git",
         {
-          "assets": ["package.json"],
+          "assets": [
+            "package.json"
+          ],
           "message": "release: ${nextRelease.version}"
         }
       ]
