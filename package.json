@@ -31,7 +31,7 @@
     "conventional-changelog-conventionalcommits": "^4.6.0",
     "mocha": "^7.1.1",
     "rewire": "^2.5.2",
-    "semantic-release": "^17.4.3"
+    "semantic-release": "^19.0.3"
   },
   "dependencies": {
     "home-dir": "^1.0.0"
